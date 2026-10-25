@@ -74,8 +74,6 @@ html.js [data-reveal].in { opacity: 1; translate: 0 0; }
 
 /* Justified body text, hyphenated so lines don't leave big gaps */
 .justify, .lead, .section-head p, .prose p { text-align: justify; hyphens: auto; -webkit-hyphens: auto; }
-/* On narrow screens justified text leaves big gaps: align left instead */
-@media (max-width: 600px) { .justify, .lead, .section-head p, .prose p { text-align: left; } }
 
 /* Reduced motion (e.g. Windows "Animation effects" off): keep fades, drop movement */
 @media (prefers-reduced-motion: reduce) {
