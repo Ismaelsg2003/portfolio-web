@@ -8,7 +8,7 @@ interface Props {
   description?: string;
 }
 const {
-  title = `${profile.shortName}, desarrollador Python`,
+  title = profile.shortName,
   description = "Portfolio de Ismael Sánchez: desarrollador Python de backend, automatización, datos e inteligencia artificial.",
 } = Astro.props;
 const home = Astro.url.pathname === "/";
