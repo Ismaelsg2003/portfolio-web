@@ -1,0 +1,76 @@
+---
+interface Props {
+  src: string;
+  poster: string;
+  label: string;
+  controls?: boolean;
+}
+const { src, poster, label, controls = false } = Astro.props;
+---
+<div class="demo">
+  <video
+    class="demo-video"
+    src={src}
+    poster={poster}
+    muted
+    loop
+    playsinline
+    preload="metadata"
+    controls={controls}
+    aria-label={label}
+    data-autoplay
+  ></video>
+  <!-- WCAG 2.2.2: anything that moves on its own for more than 5 s must be pausable -->
+  {!controls && (
+    <button class="toggle" type="button" data-video-toggle>
+      <svg class="i-pause" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1" /><rect x="14" y="5" width="4" height="14" rx="1" /></svg>
+      <svg class="i-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5z" /></svg>
+      <span class="label">Pausar vídeo</span>
+    </button>
+  )}
+</div>
+
+<script>
+  // Autoplay only when visible and only if the visitor has not asked for reduced motion.
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  document.querySelectorAll<HTMLElement>(".demo").forEach((box) => {
+    const v = box.querySelector<HTMLVideoElement>("video[data-autoplay]")!;
+    const btn = box.querySelector<HTMLButtonElement>("[data-video-toggle]");
+    let userPaused = reduce;
+    const render = () => {
+      if (!btn) return;
+      const paused = v.paused;
+      btn.querySelector(".label")!.textContent = paused ? "Reproducir vídeo" : "Pausar vídeo";
+      btn.classList.toggle("is-paused", paused);
+    };
+    v.addEventListener("play", render);
+    v.addEventListener("pause", render);
+    btn?.addEventListener("click", (e) => {
+      e.preventDefault(); e.stopPropagation();
+      userPaused = !v.paused;
+      if (userPaused) v.pause(); else v.play().catch(() => {});
+    });
+    const io = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting && !userPaused) v.play().catch(() => (v.controls = true));
+      else if (!entry.isIntersecting) v.pause();
+    }, { threshold: 0.25 });
+    io.observe(v);
+    render();
+  });
+</script>
+
+<style>
+  .demo { position: relative; }
+  .demo-video { width: 100%; aspect-ratio: 16 / 9; border-radius: 10px; background: #000; object-fit: cover; }
+  .toggle {
+    position: absolute; left: 10px; bottom: 10px; z-index: 3;
+    display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px 6px 9px; min-height: 32px;
+    border: 0; border-radius: 999px; background: rgba(11, 20, 34, .82); color: #fff;
+    font: 600 13px/1 var(--font); cursor: pointer;
+  }
+  .toggle:hover { background: rgba(11, 20, 34, .95); }
+  .toggle svg { width: 14px; height: 14px; fill: currentColor; }
+  .i-play { display: none; }
+  .is-paused .i-play { display: block; }
+  .is-paused .i-pause { display: none; }
+</style>

@@ -1,0 +1,44 @@
+---
+import type { CollectionEntry } from "astro:content";
+
+interface Props {
+  project: CollectionEntry<"projects">;
+  statusLabel: string;
+}
+const { project, statusLabel } = Astro.props;
+const { title, summary, stack, status, area } = project.data;
+const href = status === "terminado" ? `/proyectos/${project.id}/` : null;
+const Tag = href ? "a" : "div";
+---
+<article class:list={["card", { link: href }]} data-reveal>
+  <Tag href={href ?? undefined} class="inner">
+    <div class="meta"><span class:list={["status", status]}>{status === "en-desarrollo" && <i class="pulse" aria-hidden="true" />}{statusLabel}</span><span>{area}</span></div>
+    <h3>{title}</h3>
+    <p class="justify">{summary}</p>
+    <ul class="chips">{stack.map((s) => <li>{s}</li>)}</ul>
+  </Tag>
+</article>
+
+<style>
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); }
+  .inner { display: grid; gap: 12px; align-content: start; height: 100%; padding: 22px; text-decoration: none; }
+  .meta { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; font-size: 13px; color: var(--muted); }
+  h3 { font-size: 19px; }
+  p { color: var(--muted); font-size: 15.5px; }
+  .chips { margin-top: 4px; }
+  .chips :global(li) { font-size: 12.5px; }
+  /* hover focus: the card zooms in a little and lifts (uses `scale`/`translate`-free transform so it never fights the scroll reveal) */
+  /* Must outrank the global scroll-reveal transition (html.js [data-reveal]), otherwise the zoom has no animation. */
+  :global(html.js) .card, .card {
+    position: relative;
+    transition: opacity .6s ease, translate .7s cubic-bezier(.2, .8, .2, 1), scale 1s cubic-bezier(.22, 1, .36, 1),
+      box-shadow 1s ease, border-color .7s ease;
+    transition-delay: var(--d, 0ms), var(--d, 0ms), 0s, 0s, 0s;
+    /* animate on its own GPU layer with the rounded corners kept (avoids square flicker at the corners) */
+    backface-visibility: hidden; transform: translateZ(0); isolation: isolate; overflow: hidden;
+  }
+  .card:hover { scale: 1.045; z-index: 2; box-shadow: 0 26px 50px -26px rgba(15, 30, 51, .55); border-color: var(--amber); }
+  @media (hover: hover) { :global(.grid:hover) .card:not(:hover) { opacity: .5; } }
+  .pulse { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--amber); margin-right: 6px; vertical-align: 1px; animation: pulse 1.8s ease-out 4; }
+  @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(224, 168, 0, .6); } 100% { box-shadow: 0 0 0 7px rgba(224, 168, 0, 0); } }
+</style>

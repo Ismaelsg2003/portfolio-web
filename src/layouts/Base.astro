@@ -1,0 +1,312 @@
+---
+import "@fontsource-variable/schibsted-grotesk";
+import "../styles/global.css";
+import { profile } from "../data/profile";
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+const {
+  title = `${profile.shortName}, desarrollador Python`,
+  description = "Portfolio de Ismael Sánchez: desarrollador Python de backend, automatización, datos e inteligencia artificial.",
+} = Astro.props;
+const home = Astro.url.pathname === "/";
+const canonical = new URL(Astro.url.pathname, Astro.site).href;
+const ogImage = new URL("/og.png", Astro.site).href;
+const person = {
+  "@context": "https://schema.org",
+  "@type": "Person",
+  name: profile.name,
+  jobTitle: "Desarrollador Python",
+  email: `mailto:${profile.email}`,
+  url: Astro.site?.href,
+  sameAs: [profile.linkedin, profile.github],
+  alumniOf: ["UNIR, Universidad Internacional de La Rioja", "I.E.S. Albarregas"],
+  knowsAbout: ["Python", "Backend", "APIs REST", "Automatización", "RPA", "Inteligencia artificial", "Datos"],
+};
+const base = home ? "" : "/";
+---
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="es_ES" />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Ismael Sánchez, desarrollador Python" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="canonical" href={canonical} />
+    <meta name="author" content={profile.name} />
+    <meta name="theme-color" content="#f3f5f8" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0b1422" media="(prefers-color-scheme: dark)" />
+    <script type="application/ld+json" set:html={JSON.stringify(person)} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <script is:inline>
+      document.documentElement.classList.add("js");
+      try { const t = localStorage.getItem("theme"); if (t === "dark" || t === "light") document.documentElement.dataset.theme = t; } catch (e) {}
+    </script>
+  </head>
+  <body>
+    <a class="sr-only" href="#contenido">Saltar al contenido</a>
+    <div class="progress" aria-hidden="true"></div>
+    <header class="site-header">
+      <div class="wrap bar">
+        <a class="brand" href="/">{profile.shortName}</a>
+        <nav aria-label="Principal">
+          <div class="links" id="menu">
+            <a href={`${base}#sobre-mi`}>Sobre mí</a>
+            <a href={`${base}#proyectos`}>Proyectos</a>
+            <a href={`${base}#experiencia`}>Experiencia</a>
+            <a href={`${base}#formacion`}>Formación</a>
+            <a href={`${base}#contacto`}>Contacto</a>
+          </div>
+          <a class="cv" href={profile.cv} download><span class="cv-long">Descargar </span>CV<span class="sr-only"> (PDF)</span></a>
+          <button class="theme" type="button" role="switch" aria-checked="false" aria-label="Modo oscuro" title="Cambiar entre modo claro y oscuro">
+            <svg class="i-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2" /><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6" /></svg>
+            <svg class="i-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5Z" /></svg>
+            <span class="knob" aria-hidden="true"></span>
+          </button>
+          <button class="menu-btn" type="button" aria-expanded="false" aria-controls="menu" aria-label="Abrir menú">
+            <span></span><span></span><span></span>
+          </button>
+        </nav>
+      </div>
+    </header>
+    <main id="contenido">
+      <slot />
+    </main>
+    <footer class="site-footer">
+      <div class="wrap foot">
+        <span>© {new Date().getFullYear()} {profile.name}</span>
+        <span>
+          <a href={profile.github}>GitHub</a><a href={profile.linkedin}>LinkedIn</a><a href={`mailto:${profile.email}`}>{profile.email}</a>
+        </span>
+      </div>
+    </footer>
+    <script>
+      const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+      // Reveal on scroll in both directions: elements hide again when they leave the screen,
+      // so they animate in again when you scroll back to them (down or up).
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          const el = entry.target as HTMLElement;
+          if (entry.isIntersecting) {
+            const siblings = el.parentElement ? [...el.parentElement.children].filter((c) => c.hasAttribute("data-reveal")) : [];
+            el.style.setProperty("--d", `${Math.min(siblings.indexOf(el), 6) * 70}ms`);
+            el.classList.remove("above");
+            if (!el.classList.contains("in")) {
+              el.classList.add("in");
+              el.querySelectorAll<HTMLElement>("[data-count]").forEach(countUp);
+            }
+          } else {
+            // leave towards where it went: upwards if it scrolled off the top, downwards otherwise
+            el.style.setProperty("--d", "0ms");
+            el.classList.remove("in");
+            el.classList.toggle("above", entry.boundingClientRect.top < 0);
+          }
+        });
+      }, { threshold: 0.12, rootMargin: "0px 0px -30px 0px" });
+      document.querySelectorAll("[data-reveal]").forEach((el) => io.observe(el));
+
+      // Count numbers up ("44" → 0…44, "2-4 s" → 0-0 s…2-4 s); text without digits stays as is.
+      function countUp(el: HTMLElement) {
+        const target = el.dataset.final ?? (el.dataset.final = el.textContent ?? "");
+        const nums = target.match(/\d+/g);
+        if (!nums || reduce) return;
+        const start = performance.now(), dur = 1100;
+        const step = (t: number) => {
+          const k = Math.min(1, (t - start) / dur), e = 1 - Math.pow(1 - k, 3);
+          let i = 0;
+          el.textContent = target.replace(/\d+/g, () => String(Math.round(Number(nums[i++]) * e)));
+          if (k < 1) requestAnimationFrame(step); else el.textContent = target;
+        };
+        requestAnimationFrame(step);
+      }
+
+      // Mobile / tablet menu
+      const siteHeader = document.querySelector<HTMLElement>(".site-header");
+      const menuBtn = document.querySelector<HTMLButtonElement>(".menu-btn");
+      const setMenu = (open: boolean) => {
+        siteHeader?.classList.toggle("open", open);
+        menuBtn?.setAttribute("aria-expanded", String(open));
+        menuBtn?.setAttribute("aria-label", open ? "Cerrar menú" : "Abrir menú");
+      };
+      menuBtn?.addEventListener("click", () => setMenu(!siteHeader?.classList.contains("open")));
+      document.querySelectorAll("#menu a").forEach((a) => a.addEventListener("click", () => setMenu(false)));
+      document.addEventListener("keydown", (e) => { if (e.key === "Escape") setMenu(false); });
+
+      // Light / dark switch: remembers the choice, otherwise follows the system.
+      const root = document.documentElement;
+      const sysDark = window.matchMedia("(prefers-color-scheme: dark)");
+      const toggle = document.querySelector<HTMLButtonElement>(".theme");
+      const isDark = () => root.dataset.theme ? root.dataset.theme === "dark" : sysDark.matches;
+      const sync = () => toggle?.setAttribute("aria-checked", String(isDark()));
+      toggle?.addEventListener("click", () => {
+        const next = isDark() ? "light" : "dark";
+        root.dataset.theme = next;
+        try { localStorage.setItem("theme", next); } catch (e) {}
+        sync();
+      });
+      sysDark.addEventListener("change", sync); sync();
+
+      // Rotating words in the hero (with reduced motion it only fades).
+      const word = document.querySelector<HTMLElement>(".rot-word");
+      if (word) {
+        const words = ["backend y APIs", "automatización", "inteligencia artificial", "datos y Big Data"];
+        // WCAG 2.2.2: it doesn't move forever. Two full rounds, then it rests on the first
+        // word; hovering the line pauses it.
+        let i = 0, steps = 0;
+        const role = word.closest(".role");
+        let hold = false;
+        role?.addEventListener("mouseenter", () => (hold = true));
+        role?.addEventListener("mouseleave", () => (hold = false));
+        const timer = setInterval(() => {
+          if (hold) return;
+          word.classList.remove("in"); word.classList.add("out");
+          setTimeout(() => {
+            i = (i + 1) % words.length;
+            word.textContent = words[i];
+            word.classList.remove("out"); word.classList.add("in");
+          }, 350);
+          if (++steps >= words.length * 2) { clearInterval(timer); role?.classList.add("rested"); }
+        }, 3000);
+      }
+
+      // Scroll-driven effects: progress bar, hero parallax, scrubbed elements.
+      const header = document.querySelector(".site-header");
+      const parallax = [...document.querySelectorAll<HTMLElement>("[data-parallax]")];
+      const scrubs = [...document.querySelectorAll<HTMLElement>("[data-scrub]")];
+      const clamp = (v: number) => Math.max(0, Math.min(1, v));
+      let ticking = false;
+      const update = () => {
+        ticking = false;
+        const y = window.scrollY, vh = window.innerHeight;
+        const max = document.documentElement.scrollHeight - vh;
+        // 1) read every measurement first…
+        const rects = scrubs.map((el) => el.getBoundingClientRect());
+        // 2) …then write, so the browser never has to recalculate layout mid-frame.
+        root.style.setProperty("--scroll", String(max > 0 ? clamp(y / max) : 0));
+        header?.classList.toggle("scrolled", y > 8);
+        // Scroll-linked motion only moves when the visitor scrolls; with reduced motion it is halved.
+        const k = reduce ? 0.5 : 1;
+        // Parallax only on large screens; on phones/tablets the content stays put.
+        if (y < vh * 1.5 && window.innerWidth >= 960) {
+          for (const el of parallax) {
+            const speed = Number(el.dataset.parallax) * k;
+            el.style.transform = `translate3d(0, ${(y * speed).toFixed(1)}px, 0)`;
+          }
+        }
+        if (window.innerWidth < 960) for (const el of parallax) el.style.transform = "";
+        scrubs.forEach((el, n) => {
+          const r = rects[n];
+          let p: number;
+          if (el.dataset.scrub === "through") p = clamp((vh * 0.6 - r.top) / r.height);
+          else if (el.dataset.scrub === "mark") p = r.top < vh * 0.6 ? 1 : 0;
+          else p = clamp((vh - r.top) / (vh * 0.55));
+          if (reduce && el.dataset.scrub === "enter") p = 0.5 + p / 2;
+          const v = p.toFixed(3);
+          if (el.dataset.p !== v) { el.dataset.p = v; el.style.setProperty("--p", v); el.classList.toggle("passed", p >= 1); }
+        });
+      };
+      const onScroll = () => { if (!ticking) { ticking = true; requestAnimationFrame(update); } };
+      window.addEventListener("scroll", onScroll, { passive: true });
+      window.addEventListener("resize", onScroll);
+      update();
+
+      // Menu links glide to their section (also when the OS asks for reduced motion).
+      document.querySelectorAll<HTMLAnchorElement>('a[href*="#"]').forEach((a) => {
+        a.addEventListener("click", (e) => {
+          const url = new URL(a.href);
+          if (url.pathname !== location.pathname || !url.hash) return;
+          const target = document.querySelector<HTMLElement>(url.hash);
+          if (!target) return;
+          e.preventDefault();
+          const top = target.getBoundingClientRect().top + window.scrollY - 72;
+          const start = window.scrollY, dist = top - start, dur = Math.min(900, 350 + Math.abs(dist) * 0.25);
+          const t0 = performance.now();
+          const ease = (x: number) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
+          const step = (now: number) => {
+            const k2 = Math.min(1, (now - t0) / dur);
+            window.scrollTo({ top: start + dist * ease(k2), behavior: "instant" });
+            if (k2 < 1) requestAnimationFrame(step); else history.replaceState(null, "", url.hash);
+          };
+          requestAnimationFrame(step);
+        });
+      });
+    </script>
+  </body>
+</html>
+
+<style>
+  .site-header { position: sticky; top: 0; z-index: 10; background: var(--bg); border-bottom: 1px solid var(--line); }
+  .site-header { transition: box-shadow .25s; }
+  .progress { position: fixed; top: 0; left: 0; right: 0; height: 3px; z-index: 30; background: var(--amber); transform-origin: left; transform: scaleX(var(--scroll, 0)); pointer-events: none; }
+  .site-header.scrolled { box-shadow: 0 8px 24px -18px rgba(15, 30, 51, .5); }
+  .bar { display: flex; align-items: center; justify-content: space-between; gap: 16px; height: 64px; }
+  .brand { font-weight: 800; text-decoration: none; letter-spacing: -0.01em; font-size: 18px; white-space: nowrap; }
+  nav { display: flex; align-items: center; gap: 22px; font-size: 15px; }
+  .links { display: flex; align-items: center; gap: 22px; }
+  nav a { white-space: nowrap; }
+  .menu-btn { display: none; width: 40px; height: 36px; border: 1.5px solid var(--line); border-radius: 10px; background: var(--surface); cursor: pointer; padding: 0; flex-direction: column; align-items: center; justify-content: center; gap: 4px; }
+  .menu-btn span { display: block; width: 17px; height: 2px; border-radius: 2px; background: var(--ink); transition: transform .3s ease, opacity .2s ease; }
+  .open .menu-btn span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+  .open .menu-btn span:nth-child(2) { opacity: 0; }
+  .open .menu-btn span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+  nav a { text-decoration: none; color: var(--muted); font-weight: 500; }
+  nav a:hover { color: var(--ink); }
+  nav .cv { color: var(--ink); font-weight: 600; padding: 7px 14px; border: 1.5px solid var(--line); border-radius: 999px; background: var(--surface); }
+  nav .cv:hover { border-color: var(--ink); }
+  .theme { position: relative; width: 62px; height: 32px; flex: none; border-radius: 999px; border: 1.5px solid var(--line); background: var(--surface); cursor: pointer; padding: 0; display: flex; align-items: center; justify-content: space-between; padding-inline: 8px; }
+  .theme:hover { border-color: var(--ink); }
+  .theme svg { width: 15px; height: 15px; position: relative; z-index: 1; transition: color .3s; }
+  .i-sun { fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; color: var(--amber-ink); }
+  .i-sun circle { fill: var(--amber); stroke: none; }
+  .i-moon { fill: currentColor; color: var(--muted); }
+  .knob { position: absolute; top: 3px; left: 3px; width: 23px; height: 23px; border-radius: 50%; background: var(--amber-soft); box-shadow: 0 1px 3px rgba(15, 30, 51, .25); transition: transform .35s cubic-bezier(.3, 1.4, .5, 1), background .3s; }
+  .theme[aria-checked="true"] .knob { transform: translateX(30px); background: var(--mist); }
+  .theme[aria-checked="true"] .i-moon { color: var(--amber); }
+  .theme[aria-checked="true"] .i-sun { color: var(--muted); }
+  .theme[aria-checked="true"] .i-sun circle { fill: var(--muted); }
+  .site-footer { border-top: 1px solid var(--line); padding: 28px 0 40px; color: var(--muted); font-size: 14px; }
+  .foot { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; }
+  .foot a { color: var(--muted); }
+  .foot span:last-child { display: flex; flex-wrap: wrap; gap: 6px 20px; }
+  .foot a:hover { color: var(--ink); }
+  @media (max-width: 1000px) {
+    nav { gap: 10px; }
+    .menu-btn { display: flex; }
+    .links {
+      position: absolute; left: 0; right: 0; top: 64px; display: grid; gap: 0; padding: 8px 16px 16px;
+      background: var(--bg); border-bottom: 1px solid var(--line); box-shadow: 0 18px 30px -24px rgba(15, 30, 51, .5);
+      opacity: 0; translate: 0 -8px; pointer-events: none; visibility: hidden; transition: opacity .25s ease, translate .3s ease, visibility 0s linear .3s;
+    }
+    .links a { padding: 12px 4px; border-bottom: 1px solid var(--line); font-size: 17px; color: var(--ink); }
+    .links a:last-child { border-bottom: 0; }
+    .open .links { opacity: 1; translate: 0 0; pointer-events: auto; visibility: visible; transition-delay: 0s; }
+  }
+  @media (max-width: 420px) {
+    .cv-long { display: none; }
+    nav .cv { padding: 7px 12px; }
+    .brand { font-size: 17px; }
+  }
+  @media (max-width: 360px) {
+    nav { gap: 6px; }
+    .brand { font-size: 15.5px; }
+    nav .cv { padding: 6px 10px; font-size: 14px; }
+    .theme { width: 52px; height: 30px; padding-inline: 6px; }
+    .theme svg { width: 13px; height: 13px; }
+    .knob { width: 21px; height: 21px; }
+    .theme[aria-checked="true"] .knob { transform: translateX(22px); }
+    .menu-btn { width: 36px; height: 32px; }
+  }
+</style>

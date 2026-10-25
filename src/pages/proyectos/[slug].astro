@@ -1,0 +1,81 @@
+---
+import { getCollection, render, type CollectionEntry } from "astro:content";
+import Base from "../../layouts/Base.astro";
+import DemoVideo from "../../components/DemoVideo.astro";
+
+export async function getStaticPaths() {
+  const done = await getCollection("projects", (p) => p.data.status === "terminado");
+  return done.map((project) => ({ params: { slug: project.id }, props: { project } }));
+}
+
+interface Props { project: CollectionEntry<"projects"> }
+const { project } = Astro.props;
+const { Content } = await render(project);
+const d = project.data;
+---
+<Base title={`${d.title} | Ismael Sánchez`} description={d.summary}>
+  <section class="head">
+    <div class="wrap">
+      <a class="back" href="/#proyectos">← Todos los proyectos</a>
+      <div class="meta"><span class="status terminado">Terminado</span><span>{d.area}</span></div>
+      <h1>{d.title}</h1>
+      <p class="summary">{d.summary}</p>
+      <div class="actions">
+        {d.repo && <a class="btn btn-primary" href={d.repo}>Código en GitHub</a>}
+        {d.demo && <a class="btn btn-line" href={d.demo}>Probar la demo</a>}
+      </div>
+    </div>
+  </section>
+
+  {d.video && (
+    <div class="wrap media">
+      <DemoVideo src={d.video} poster={d.poster!} label={`Vídeo de la demo: ${d.title}`} controls />
+    </div>
+  )}
+
+  <section class="body">
+    <div class="wrap layout">
+      <article class="prose"><Content /></article>
+      <div class="side">
+        {d.metrics.length > 0 && (
+          <dl class="metrics">
+            {d.metrics.map((m) => <div><dt>{m.value}</dt><dd>{m.label}</dd></div>)}
+          </dl>
+        )}
+        <h2 class="aside-h">Stack</h2>
+        <ul class="chips">{d.stack.map((s) => <li>{s}</li>)}</ul>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .head { padding: 48px 0 32px; }
+  .back { display: inline-block; margin-bottom: 26px; color: var(--muted); text-decoration: none; font-weight: 500; }
+  .back:hover { color: var(--ink); }
+  .meta { display: flex; gap: 12px; align-items: center; color: var(--muted); font-size: 14px; margin-bottom: 14px; }
+  h1 { font-size: clamp(36px, 5vw, 58px); font-weight: 800; letter-spacing: -0.03em; max-width: 18ch; }
+  .summary { margin-top: 18px; font-size: 19px; color: var(--muted); max-width: 62ch; }
+  .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 26px; }
+  .media { background: var(--frame); border: 1px solid var(--line); padding: 10px; border-radius: var(--radius-lg); }
+  .body { padding-top: 56px; }
+  .layout { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 56px; align-items: start; }
+  .side { position: sticky; top: 88px; display: grid; gap: 14px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 22px; }
+  .aside-h { font-size: 16px; font-weight: 700; letter-spacing: 0; margin-top: 6px; }
+  .metrics { display: grid; gap: 14px; margin: 0; }
+  .metrics div { border-left: 3px solid var(--amber); padding-left: 12px; }
+  .metrics dt { font-size: 26px; font-weight: 800; }
+  .metrics dd { margin: 0; font-size: 14px; color: var(--muted); line-height: 1.4; }
+
+  .prose { max-width: 70ch; }
+  .prose :global(p) { color: var(--muted); margin-bottom: 18px; }
+  .prose :global(h2) { font-size: 28px; margin: 40px 0 14px; }
+  .prose :global(h2:first-child) { margin-top: 0; }
+  .prose :global(ul) { padding-left: 20px; display: grid; gap: 10px; color: var(--muted); margin: 0 0 18px; }
+  .prose :global(strong) { color: var(--ink); }
+
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; gap: 32px; }
+    .side { position: static; }
+  }
+</style>
