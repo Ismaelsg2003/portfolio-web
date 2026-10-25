@@ -20,7 +20,7 @@ export const facts = [
   { label: "Estudiando", value: "Ingeniería en Inteligencia Artificial (UNIR)" },
   { label: "Último puesto", value: "Programador Python en Grúas Eugenio" },
   { label: "Stack principal", value: "Python, FastAPI, Node.js, SQL y Docker" },
-  { label: "Idiomas", value: "Español nativo, inglés B1" },
+  { label: "Idiomas", value: "Español Nativo - Inglés B1" },
 ];
 
 export const services = [
